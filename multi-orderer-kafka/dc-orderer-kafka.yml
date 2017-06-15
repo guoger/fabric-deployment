@@ -1,0 +1,289 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+version: '2'
+
+services:
+
+  zookeeper0.example.com:
+    container_name: zookeeper0.example.com
+    extends:
+      file: dc-orderer-kafka-base.yml
+      service: zookeeper
+    environment:
+      # ========================================================================
+      #     Reference: https://zookeeper.apache.org/doc/r3.4.9/zookeeperAdmin.html#sc_configuration
+      # ========================================================================
+      #
+      # myid
+      # The ID must be unique within the ensemble and should have a value
+      # between 1 and 255.
+      - ZOO_MY_ID=1
+      #
+      # server.x=[hostname]:nnnnn[:nnnnn]
+      # The list of servers that make up the ZK ensemble. The list that is used
+      # by the clients must match the list of ZooKeeper servers that each ZK
+      # server has. There are two port numbers `nnnnn`. The first is what
+      # followers use to connect to the leader, while the second is for leader
+      # election.
+      - ZOO_SERVERS=server.1=zookeeper0.example.com:2888:3888 server.2=zookeeper1.example.com:2888:3888 server.3=zookeeper2.example.com:2888:3888
+
+  zookeeper1.example.com:
+    container_name: zookeeper1.example.com
+    extends:
+      file: dc-orderer-kafka-base.yml
+      service: zookeeper
+    environment:
+      - ZOO_MY_ID=2
+      - ZOO_SERVERS=server.1=zookeeper0.example.com:2888:3888 server.2=zookeeper1.example.com:2888:3888 server.3=zookeeper2.example.com:2888:3888
+
+  zookeeper2.example.com:
+    container_name: zookeeper2.example.com
+    extends:
+      file: dc-orderer-kafka-base.yml
+      service: zookeeper
+    environment:
+      - ZOO_MY_ID=3
+      - ZOO_SERVERS=server.1=zookeeper0.example.com:2888:3888 server.2=zookeeper1.example.com:2888:3888 server.3=zookeeper2.example.com:2888:3888
+
+  kafka0.example.com:
+    container_name: kafka0.example.com
+    extends:
+      file: dc-orderer-kafka-base.yml
+      service: kafka
+    environment:
+      # ========================================================================
+      #     Reference: https://kafka.apache.org/documentation/#configuration
+      # ========================================================================
+      #
+      # broker.id
+      - KAFKA_BROKER_ID=0
+      #
+      # min.insync.replicas
+      # Let the value of this setting be M. Data is considered committed when
+      # it is written to at least M replicas (which are then considered in-sync
+      # and belong to the in-sync replica set, or ISR). In any other case, the
+      # write operation returns an error. Then:
+      # 1. if just one replica out of the N (see default.replication.factor
+      # below) that the channel data is written to becomes unavailable,
+      # operations proceed normally.
+      # 2. If N - M + 1 (or more) replicas become unavailable, Kafka cannot
+      # maintain an ISR set of M, so it stops accepting writes. Reads work
+      # without issues. The cluster becomes writeable again when M replicas get
+      # in-sync.
+      - KAFKA_MIN_INSYNC_REPLICAS=2
+      #
+      # default.replication.factor
+      # Let the value of this setting be M. This means that:
+      # 1. Each channel will have its data replicated to N brokers. These are
+      # the candidates for the ISR set for a channel. As we've noted in the
+      # min.insync.replicas section above, not all of these brokers have to be
+      # available all the time. We choose a default.replication.factor of N so
+      # as to have the largest possible candidate set for a channel's ISR.
+      # 2. Channel creations cannot go forward if less than N brokers are up.
+      - KAFKA_DEFAULT_REPLICATION_FACTOR=3
+      #
+      # zookeper.connect
+      # Point to the set of Zookeeper nodes comprising a ZK ensemble.
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper0.example.com:2181,zookeeper1.example.com:2181,zookeeper2.example.com:2181
+      #
+      # zookeeper.connection.timeout.ms
+      # The max time that the client waits to establish a connection to
+      # Zookeeper. If not set, the value in zookeeper.session.timeout.ms (below)
+      # is used.
+      #- KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS = 6000
+      #
+      # zookeeper.session.timeout.ms
+      #- KAFKA_ZOOKEEPER_SESSION_TIMEOUT_MS = 6000
+    depends_on:
+      - zookeeper0.example.com
+      - zookeeper1.example.com
+      - zookeeper2.example.com
+
+  kafka1.example.com:
+    container_name: kafka1.example.com
+    extends:
+      file: dc-orderer-kafka-base.yml
+      service: kafka
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_DEFAULT_REPLICATION_FACTOR=3
+      - KAFKA.MIN_INSYNC_REPLICAS=2
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper0.example.com:2181,zookeeper1.example.com:2181,zookeeper2.example.com:2181
+    depends_on:
+      - zookeeper0.example.com
+      - zookeeper1.example.com
+      - zookeeper2.example.com
+
+  kafka2.example.com:
+    container_name: kafka2.example.com
+    extends:
+      file: dc-orderer-kafka-base.yml
+      service: kafka
+    environment:
+      - KAFKA_BROKER_ID=2
+      - KAFKA_DEFAULT_REPLICATION_FACTOR=3
+      - KAFKA.MIN_INSYNC_REPLICAS=2
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper0.example.com:2181,zookeeper1.example.com:2181,zookeeper2.example.com:2181
+    depends_on:
+      - zookeeper0.example.com
+      - zookeeper1.example.com
+      - zookeeper2.example.com
+
+  kafka3.example.com:
+    container_name: kafka3.example.com
+    extends:
+      file: dc-orderer-kafka-base.yml
+      service: kafka
+    environment:
+      - KAFKA_BROKER_ID=3
+      - KAFKA_DEFAULT_REPLICATION_FACTOR=3
+      - KAFKA.MIN_INSYNC_REPLICAS=2
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper0.example.com:2181,zookeeper1.example.com:2181,zookeeper2.example.com:2181
+    depends_on:
+      - zookeeper0.example.com
+      - zookeeper1.example.com
+      - zookeeper2.example.com
+
+  orderer0.example.com:
+    container_name: orderer0.example.com
+    extends:
+      file: dc-orderer-base.yml
+      service: orderer-base
+    volumes:
+      - ./channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - ./crypto-config/ordererOrganizations/example.com/orderers/orderer0.example.com/msp:/var/hyperledger/orderer/msp
+      - ./crypto-config/ordererOrganizations/example.com/orderers/orderer0.example.com/tls/:/var/hyperledger/orderer/tls
+    depends_on:
+      - zookeeper0.example.com
+      - zookeeper1.example.com
+      - zookeeper2.example.com
+      - kafka0.example.com
+      - kafka1.example.com
+      - kafka2.example.com
+      - kafka3.example.com
+ 
+
+  orderer1.example.com:
+    container_name: orderer1.example.com
+    extends:
+      file: dc-orderer-base.yml
+      service: orderer-base
+    volumes:
+      - ./channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - ./crypto-config/ordererOrganizations/example.com/orderers/orderer1.example.com/msp:/var/hyperledger/orderer/msp
+      - ./crypto-config/ordererOrganizations/example.com/orderers/orderer1.example.com/tls/:/var/hyperledger/orderer/tls
+    depends_on:
+      - zookeeper0.example.com
+      - zookeeper1.example.com
+      - zookeeper2.example.com
+      - kafka0.example.com
+      - kafka1.example.com
+      - kafka2.example.com
+      - kafka3.example.com
+
+  peer0.org0.example.com:
+    container_name: peer0.org0.example.com
+    extends:
+      file:  dc-peer-base.yml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.org0.example.com
+      - CORE_PEER_ADDRESS=peer0.org0.example.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org0.example.com:7051
+      - CORE_PEER_LOCALMSPID=Org0MSP
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./crypto-config/peerOrganizations/org0.example.com/peers/peer0.org0.example.com/msp:/etc/hyperledger/fabric/msp
+        - ./crypto-config/peerOrganizations/org0.example.com/peers/peer0.org0.example.com/tls:/etc/hyperledger/fabric/tls
+    ports:
+      - '7051'
+      - '7053'
+
+  peer1.org0.example.com:
+    container_name: peer1.org0.example.com
+    extends:
+      file:  dc-peer-base.yml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer1.org0.example.com
+      - CORE_PEER_ADDRESS=peer1.org0.example.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.org0.example.com:7051
+      - CORE_PEER_LOCALMSPID=Org0MSP
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./crypto-config/peerOrganizations/org1.example.com/peers/peer1.org0.example.com/msp:/etc/hyperledger/fabric/msp
+        - ./crypto-config/peerOrganizations/org1.example.com/peers/peer1.org0.example.com/tls:/etc/hyperledger/fabric/tls
+    ports:
+      - '7051'
+      - '7053'
+
+  peer0.org1.example.com:
+    container_name: peer0.org1.example.com
+    extends:
+      file:  dc-peer-base.yml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.org1.example.com
+      - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.example.com:7051
+      - CORE_PEER_LOCALMSPID=Org1MSP
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp:/etc/hyperledger/fabric/msp
+        - ./crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls:/etc/hyperledger/fabric/tls
+    ports:
+      - '7051'
+      - '7053'
+
+  peer1.org1.example.com:
+    container_name: peer1.org1.example.com
+    extends:
+      file:  dc-peer-base.yml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer1.org1.example.com
+      - CORE_PEER_ADDRESS=peer1.org1.example.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.org1.example.com:7051
+      - CORE_PEER_LOCALMSPID=Org1MSP
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./crypto-config/peerOrganizations/org1.example.com/peers/peer1.org1.example.com/msp:/etc/hyperledger/fabric/msp
+        - ./crypto-config/peerOrganizations/org1.example.com/peers/peer1.org1.example.com/tls:/etc/hyperledger/fabric/tls
+    ports:
+      - '7051'
+      - '7053'
+
+  cli:
+    container_name: cli
+    image: hyperledger/fabric-tools
+    tty: true
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_LOGGING_LEVEL=DEBUG
+      - CORE_PEER_ID=cli
+      - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+      - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    # command: /bin/bash -c './scripts/script.sh ${CHANNEL_NAME}; sleep $TIMEOUT'
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../chaincode/go/:/opt/gopath/src/github.com/hyperledger/fabric/examples/chaincode/go
+        - ./crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
+        - ./scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/
+        - ./channel-artifacts:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts
+    depends_on:
+      - orderer0.example.com
+      - orderer1.example.com
+      - peer0.org0.example.com
+      - peer1.org0.example.com
+      - peer0.org1.example.com
+      - peer1.org1.example.com
