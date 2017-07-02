@@ -184,42 +184,6 @@ services:
       - kafka2.example.com
       - kafka3.example.com
 
-  peer0.org0.example.com:
-    container_name: peer0.org0.example.com
-    extends:
-      file:  dc-peer-base.yml
-      service: peer-base
-    environment:
-      - CORE_PEER_ID=peer0.org0.example.com
-      - CORE_PEER_ADDRESS=peer0.org0.example.com:7051
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org0.example.com:7051
-      - CORE_PEER_LOCALMSPID=Org0MSP
-    volumes:
-        - /var/run/:/host/var/run/
-        - ./crypto-config/peerOrganizations/org0.example.com/peers/peer0.org0.example.com/msp:/etc/hyperledger/fabric/msp
-        - ./crypto-config/peerOrganizations/org0.example.com/peers/peer0.org0.example.com/tls:/etc/hyperledger/fabric/tls
-    ports:
-      - '7051'
-      - '7053'
-
-  peer1.org0.example.com:
-    container_name: peer1.org0.example.com
-    extends:
-      file:  dc-peer-base.yml
-      service: peer-base
-    environment:
-      - CORE_PEER_ID=peer1.org0.example.com
-      - CORE_PEER_ADDRESS=peer1.org0.example.com:7051
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.org0.example.com:7051
-      - CORE_PEER_LOCALMSPID=Org0MSP
-    volumes:
-        - /var/run/:/host/var/run/
-        - ./crypto-config/peerOrganizations/org0.example.com/peers/peer1.org0.example.com/msp:/etc/hyperledger/fabric/msp
-        - ./crypto-config/peerOrganizations/org0.example.com/peers/peer1.org0.example.com/tls:/etc/hyperledger/fabric/tls
-    ports:
-      - '7051'
-      - '7053'
-
   peer0.org1.example.com:
     container_name: peer0.org1.example.com
     extends:
@@ -256,6 +220,42 @@ services:
       - '7051'
       - '7053'
 
+  peer0.org2.example.com:
+    container_name: peer0.org2.example.com
+    extends:
+      file:  dc-peer-base.yml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.org2.example.com
+      - CORE_PEER_ADDRESS=peer0.org2.example.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org2.example.com:7051
+      - CORE_PEER_LOCALMSPID=Org2MSP
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/msp:/etc/hyperledger/fabric/msp
+        - ./crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls:/etc/hyperledger/fabric/tls
+    ports:
+      - '7051'
+      - '7053'
+
+  peer1.org2.example.com:
+    container_name: peer1.org2.example.com
+    extends:
+      file:  dc-peer-base.yml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer1.org2.example.com
+      - CORE_PEER_ADDRESS=peer1.org2.example.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.org2.example.com:7051
+      - CORE_PEER_LOCALMSPID=Org2MSP
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./crypto-config/peerOrganizations/org2.example.com/peers/peer1.org2.example.com/msp:/etc/hyperledger/fabric/msp
+        - ./crypto-config/peerOrganizations/org2.example.com/peers/peer1.org2.example.com/tls:/etc/hyperledger/fabric/tls
+    ports:
+      - '7051'
+      - '7053'
+
   cli:
     container_name: cli
     image: hyperledger/fabric-tools
@@ -265,15 +265,15 @@ services:
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
       - CORE_LOGGING_LEVEL=DEBUG
       - CORE_PEER_ID=cli
-      - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
-      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_PEER_ADDRESS=peer0.org2.example.com:7051
+      - CORE_PEER_LOCALMSPID=Org2MSP
       - CORE_PEER_TLS_ENABLED=true
-      - CORE_PEER_TLS_CERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/server.crt
-      - CORE_PEER_TLS_KEY_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/server.key
-      - CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
-      - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+      - CORE_PEER_TLS_CERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
+      - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
-    # command: /bin/bash -c './scripts/script.sh ${CHANNEL_NAME}; sleep $TIMEOUT'
+    command: /bin/bash -c './scripts/script.sh ${CHANNEL_NAME}; sleep $TIMEOUT'
     volumes:
         - /var/run/:/host/var/run/
         - ../chaincode/go/:/opt/gopath/src/github.com/hyperledger/fabric/examples/chaincode/go
@@ -283,7 +283,7 @@ services:
     depends_on:
       - orderer0.example.com
       - orderer1.example.com
-      - peer0.org0.example.com
-      - peer1.org0.example.com
       - peer0.org1.example.com
       - peer1.org1.example.com
+      - peer0.org2.example.com
+      - peer1.org2.example.com
