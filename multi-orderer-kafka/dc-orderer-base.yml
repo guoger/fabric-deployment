@@ -8,7 +8,7 @@ version: '2'
 services:
 
   orderer-base:
-    image: hyperledger/fabric-orderer:x86_64-1.0.0-beta
+    image: hyperledger/fabric-orderer:latest
     environment:
       - ORDERER_GENERAL_GENESISMETHOD=file
       - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block

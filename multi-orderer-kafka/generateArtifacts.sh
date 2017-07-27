@@ -18,38 +18,9 @@ echo
 
 OS_ARCH=$(echo "$(uname -s|tr '[:upper:]' '[:lower:]'|sed 's/mingw64_nt.*/windows/')-$(uname -m | sed 's/x86_64/amd64/g')" | awk '{print tolower($0)}')
 
-## Using docker-compose template replace private key file names with constants
-function replacePrivateKey () {
-	ARCH=`uname -s | grep Darwin`
-	if [ "$ARCH" == "Darwin" ]; then
-		OPTS="-it"
-	else
-		OPTS="-i"
-	fi
-
-	cp docker-compose-e2e-template.yaml docker-compose-e2e.yaml
-
-        CURRENT_DIR=$PWD
-        cd crypto-config/peerOrganizations/org1.example.com/ca/
-        PRIV_KEY=$(ls *_sk)
-        cd $CURRENT_DIR
-        sed $OPTS "s/CA1_PRIVATE_KEY/${PRIV_KEY}/g" docker-compose-e2e.yaml
-        cd crypto-config/peerOrganizations/org2.example.com/ca/
-        PRIV_KEY=$(ls *_sk)
-        cd $CURRENT_DIR
-        sed $OPTS "s/CA2_PRIVATE_KEY/${PRIV_KEY}/g" docker-compose-e2e.yaml
-}
-
 ## Generates Org certs using cryptogen tool
 function generateCerts (){
-	CRYPTOGEN=$FABRIC_ROOT/release/$OS_ARCH/bin/cryptogen
-
-	if [ -f "$CRYPTOGEN" ]; then
-            echo "Using cryptogen -> $CRYPTOGEN"
-	else
-	    echo "Building cryptogen"
-	    make -C $FABRIC_ROOT release
-	fi
+	CRYPTOGEN=cryptogen
 
 	echo
 	echo "##########################################################"
@@ -61,14 +32,7 @@ function generateCerts (){
 
 ## Generate orderer genesis block , channel configuration transaction and anchor peer update transactions
 function generateChannelArtifacts() {
-
-	CONFIGTXGEN=$FABRIC_ROOT/release/$OS_ARCH/bin/configtxgen
-	if [ -f "$CONFIGTXGEN" ]; then
-            echo "Using configtxgen -> $CONFIGTXGEN"
-	else
-	    echo "Building configtxgen"
-	    make -C $FABRIC_ROOT release
-	fi
+	CONFIGTXGEN=configtxgen
 
 	echo "##########################################################"
 	echo "#########  Generating Orderer Genesis block ##############"
@@ -98,6 +62,5 @@ function generateChannelArtifacts() {
 }
 
 generateCerts
-#replacePrivateKey
 generateChannelArtifacts
 
